@@ -24,7 +24,7 @@ export default function App() {
   // Load the initial scenario on mount
   useEffect(() => {
     loadScenario("scenario_light");
-  }, []);
+  }, [loadScenario]);
 
   const activeCount = flights.filter((f) => f.active).length;
 
