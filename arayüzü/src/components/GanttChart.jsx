@@ -1,9 +1,8 @@
-﻿import React from 'react';
-import { Chart } from 'react-google-charts';
-import { useStore } from '../store/useStore';
+﻿import { Chart } from "react-google-charts";
+import { useStore } from "../store/useStore";
 
 const GanttChart = () => {
-  const { flights, assignments, gateColors } = useStore();
+  const { flights, assignments, gates, gateColors } = useStore();
 
   const columns = [
     { type: "string", label: "Task ID" },
@@ -16,21 +15,37 @@ const GanttChart = () => {
     { type: "string", label: "Dependencies" },
   ];
 
-  const activeFlights = flights.filter(f => f.active && assignments[f.id]);
+  const activeFlights = flights.filter((f) => f.active && assignments[f.id]);
 
-  const rows = activeFlights.map(f => {
-    const [startH, startM] = f.arrival.split(':').map(Number);
-    const [endH, endM] = f.departure.split(':').map(Number);
-    
+  const rows = activeFlights.map((f) => {
+    const [startH, startM] = f.arrival.split(":").map(Number);
+    const [endH, endM] = f.departure.split(":").map(Number);
+
     // We use a fixed date (today) to represent the 24-hour cycle
     const now = new Date();
-    const startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), startH, startM);
-    const endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), endH, endM);
+    const startDate = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      startH,
+      startM,
+    );
+    const endDate = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      endH,
+      endM,
+    );
+
+    const gateId = assignments[f.id];
+    const gateObj = gates.find((g) => g.id === gateId);
+    const gateLabel = gateObj ? `${gateId} (${gateObj.size})` : gateId;
 
     return [
       f.id,
-      `Flight ${f.id}`,
-      assignments[f.id], // Grouping by Gate
+      `Flight ${f.id} (${f.aircraft_size})`,
+      gateLabel,
       startDate,
       endDate,
       null,
@@ -46,17 +61,17 @@ const GanttChart = () => {
     gantt: {
       trackHeight: 40,
       labelStyle: {
-        fontName: 'Inter, system-ui, sans-serif',
+        fontName: "Inter, system-ui, sans-serif",
         fontSize: 12,
-        color: '#475569',
+        color: "#475569",
       },
-      criticalPathEnabled: false, // Conflicts are shown in the Matrix/Graph
+      criticalPathEnabled: false,
       innerGridHorizLine: {
-        stroke: '#f1f5f9',
+        stroke: "#f1f5f9",
         strokeWidth: 1,
       },
-      innerGridTrack: { fill: '#ffffff' },
-      innerGridDarkTrack: { fill: '#f8fafc' },
+      innerGridTrack: { fill: "#ffffff" },
+      innerGridDarkTrack: { fill: "#f8fafc" },
     },
   };
 
@@ -78,12 +93,23 @@ const GanttChart = () => {
         options={options}
       />
       <div className="mt-4 flex flex-wrap gap-4 px-2">
-        {Object.entries(gateColors).map(([gate, color]) => (
-          <div key={gate} className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: color }}></div>
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter">{gate}</span>
-          </div>
-        ))}
+        {Object.entries(gateColors).map(([gate, color]) => {
+          const g = gates.find((it) => it.id === gate);
+          return (
+            <div key={gate} className="flex items-center gap-2">
+              <div
+                className="w-3 h-3 rounded-full"
+                style={{ backgroundColor: color }}
+              ></div>
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter">
+                {gate}{" "}
+                <span className="text-slate-300 font-normal">
+                  ({g?.size || "?"})
+                </span>
+              </span>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

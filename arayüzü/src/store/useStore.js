@@ -7,6 +7,7 @@ export const useStore = create((set, get) => ({
   assignments: {},
   graphData: null,
   chromaticNumber: 0,
+  theoreticalMin: 0,
   gateColors: {},
 
   loadScenario: async (name) => {
@@ -31,9 +32,24 @@ export const useStore = create((set, get) => ({
     await get().solve(); // Re-calculate constraints after toggle
   },
 
+  addGate: async (size) => {
+    await client.post(`/gates?size=${size}`);
+    const stateRes = await client.get("/state");
+    set({ gates: stateRes.data.gates });
+    await get().solve();
+  },
+
+  removeGate: async (id) => {
+    await client.delete(`/gates/${id}`);
+    const stateRes = await client.get("/state");
+    set({ gates: stateRes.data.gates });
+    await get().solve();
+  },
+
   solve: async () => {
     const res = await client.post("/solve");
-    const { assignments, chromatic_number, graph_data } = res.data;
+    const { assignments, chromatic_number, theoretical_min, graph_data } =
+      res.data;
 
     // Generate colors for each gate
     const palette = [
@@ -57,6 +73,7 @@ export const useStore = create((set, get) => ({
     set({
       assignments,
       chromaticNumber: chromatic_number,
+      theoreticalMin: theoretical_min,
       graphData: graph_data,
       gateColors,
     });
