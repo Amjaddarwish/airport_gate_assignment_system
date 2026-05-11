@@ -105,6 +105,12 @@ export default function App() {
                     {chromaticNumber}
                   </span>
                 </div>
+                {/* Error Message Logic */}
+                {chromaticNumber < theoreticalMin && (
+                  <span className="text-red-500 text-[10px] font-bold italic">
+                    ⚠ Not all flights are assigned
+                  </span>
+                )}
               </div>
             </div>
           </div>
