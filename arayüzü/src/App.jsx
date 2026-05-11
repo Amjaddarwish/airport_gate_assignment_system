@@ -5,7 +5,7 @@ import ConflictMatrix from "./components/ConflictMatrix";
 import ConflictGraph from "./components/ConflictGraph";
 import GateManager from "./components/GateManager";
 import AssignmentTable from "./components/AssignmentTable";
-
+import './index.css'
 export default function App() {
   const {
     loadScenario,
